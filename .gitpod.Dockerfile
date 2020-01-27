@@ -7,5 +7,5 @@ RUN tar -xvf shellcheck-"${SHELLCHECK_VERSION}".linux.x86_64.tar.xz
 RUN cp shellcheck-"${SHELLCHECK_VERSION}"/shellcheck /usr/bin/
 RUN shellcheck --version
 RUN echo 'export PATH="/workspace/coe-865/bin:$PATH"' >> ~/.bashrc
-RUN apt install net-tools -y
+RUN apt-get update && apt-get install -y net-tools
 CMD ["bash"]
