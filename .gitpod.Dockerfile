@@ -6,5 +6,5 @@ RUN wget "https://storage.googleapis.com/shellcheck/shellcheck-${SHELLCHECK_VERS
 RUN tar -xvf shellcheck-"${SHELLCHECK_VERSION}".linux.x86_64.tar.xz
 RUN cp shellcheck-"${SHELLCHECK_VERSION}"/shellcheck /usr/bin/
 RUN shellcheck --version
-RUN echo 'export PATH="/workspace/network/bin:$PATH"' >> ~/.bashrc
+RUN echo 'export PATH="/workspace/coe-865/bin:$PATH"' >> ~/.bashrc
 CMD ["bash"]
