@@ -4,6 +4,33 @@
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/env/env.sh"
 # shellcheck source=./lib/log/log.sh
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/log/log.sh"
+# This function asks the user to give a value according to a question
+# And a default value
+function ask_user() {
+    # $1 The question
+    # $2 The default value
+    # $3 Set to "yes" to automatically accept the default value
+    # $4 Set to "yes" to not generate outputs (but still read inputs)
+    # $5 The variable to declare globally with the user's answer as value
+    VAL=""
+    if [ "yes" != "$4" ]; then
+        printf "$1 [$2]: " >&2
+    fi
+
+    if [ "yes" != "$3" ]; then
+        read VAL
+    else
+        if [ "yes" != "$4" ]; then
+            # Don't simulate user input if we're not supposed to output stuff!
+            echo "$2" >&2
+        fi
+    fi
+
+    if [ -z "$VAL" ]; then
+        VAL="$2"
+    fi
+    printf -v "$5" "$VAL"
+}
 
 function file_exists() {
     local -r file="$1"

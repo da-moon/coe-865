@@ -4,8 +4,41 @@
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/env/env.sh"
 # shellcheck source=./lib/log/log.sh
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/log/log.sh"
-# shellcheck source=./lib/os/os.sh
-source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/os/os.sh"
+# shellcheck source=./lib/network/network.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/network/network.sh"
+# shellcheck source=./lib/array/array.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/array/array.sh"
+# shellcheck source=./lib/string/string.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/string/string.sh"
+
+export SUBNET_NR=0
+function generate_config_line() {
+    interface="$1"
+    input="$2"
+    local count="$(($3))"
+    local netmask
+    net_id=$(echo $input | cut -d'/' -f1)
+    cidr=$(echo $input | cut -d'/' -f2)
+    local ips
+    for ((i = 1; i <= $count; i++)); do
+        temp=$(get_ip4_random_address "$net_id" "$cidr" "$count")
+        if [[ $i == 1 ]]; then
+            ips=$(array_join " " "$temp")
+        else
+            ips=$(array_join " " "$ips" "$temp")
+        fi
+    done
+    netmask=$(cidr2netmask "$cidr")
+    declare -a result=()
+    for value in ${ips}; do
+        if [ ${#result[@]} -eq 0 ]; then
+            result=$(array_join "\n" "/sbin/ifconfig $interface $value netmask $netmask")
+        else
+            result=$(array_join "\n" "$result" "/sbin/ifconfig $interface $value netmask $netmask")
+        fi
+    done
+    echo $result
+}
 function generate_ipaddr_exec() {
     local target=$HOME/IPaddr.exec
     if [[ $# == 1 ]]; then
@@ -30,7 +63,7 @@ function turn_on_ip_forwarding() {
     log_info "IP Forwarding was turned on successfully"
 }
 function show_interface_status() {
-    log_info "Showing interface status with ifconfig"
+    log_info "Showing interface status with /sbin/ifconfig"
     /sbin/ifconfig -a
 }
 function check_configuration() {
@@ -57,6 +90,49 @@ function remove_default_route() {
     log_info "removing default route"
     /sbin/route delete default
 }
+
+# https://github.com/jeromebarbier/hpe-project/blob/master/vm_tools/generate_heat_template.sh
+function generate_subnet() {
+    # This function generates a new subnetwork
+
+    CIDR="$1"
+    local netmask
+    NEXT_SUBNET_ID=$(($SUBNET_NR + 1))
+    # Compute new CIDR
+    if [ "$SUBNET_NR" != "1" ]; then
+        # Compute the first IP address of the next network
+        LAST_IP_IN_RANGE=$(ip_int_last_of_range $CIDR)
+        NEXT_NETWORK_IP_AS_INT=$(($LAST_IP_IN_RANGE + 1))
+        NEXT_NETWORK_IP=$(ip_int2string $NEXT_NETWORK_IP_AS_INT)
+        MASK=$(echo $CIDR | cut -d'/' -f2)
+        bit_netmask=$(prefix_to_bit_netmask $MASK)
+        netmask=$(bit_netmask_to_expanded_netmask "$bit_netmask")
+
+        CIDR="$NEXT_NETWORK_IP/$MASK"
+    fi
+
+    GATEWAY=$(ip_int2string $(($(ip_int_last_of_range $CIDR) - 1)))
+    netmask=$(echo $netmask | sed "s, ,\\.,g")
+    echo "$GATEWAY"
+    # eth1 10.1.1.20 netmask 255.255.255.0
+
+    #     echo "  # Private subnetwork #$SUBNET_NR, CIDR=$CIDR, gateway=$GATEWAY
+    #   private_subnet$SUBNET_NR:
+    #     type: OS::Neutron::Subnet
+    #     properties:
+    #       network_id: { get_resource: private_net }
+    #       cidr: $CIDR
+    #       name: $PRIVATE_SUBNET_NAME$SUBNET_NR
+    #       dns_nameservers: [ $DNS ]
+    #       gateway_ip: $GATEWAY
+    #   router_interface$SUBNET_NR:
+    #     type: OS::Neutron::RouterInterface
+    #     properties:
+    #       router_id: { get_resource: router }
+    #       subnet_id: { get_resource: private_subnet$SUBNET_NR }
+    # "
+}
+
 function is_git_available() {
     if ! os_command_is_installed "git"; then
         log_error "git is not available. existing..."

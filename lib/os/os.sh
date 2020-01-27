@@ -12,20 +12,14 @@ function os_command_is_installed() {
     name="$1"
     command -v "$name" >/dev/null
 }
-# # chenges directory and executes a function, then retunr back
-# # to original directory
-# # $1 <-> target path
-# # $2 <-> method to be executed
-# function temp_cd_exec() {
 
-# }
 function has_apt() {
     [ -n "$(command -v apt)" ]
 }
 function has_dpkg() {
     [ -n "$(command -v dpkg)" ]
 }
-unique_id() {
+function unique_id() {
     local length
     local result
     length="$1"

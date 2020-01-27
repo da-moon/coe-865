@@ -8,8 +8,11 @@ source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/log/log.s
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/lab1/lab1.sh"
 # shellcheck source=./lib/assert/assert.sh
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/assert/assert.sh"
+# shellcheck source=./lib/io/io.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/io/io.sh"
 
 function lab1_help() {
+
     echo
     echo "Usage: [network lab1 | network_lab1] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
     echo
@@ -19,7 +22,8 @@ function lab1_help() {
     echo "Commands:"
     echo
     echo -e "  configure-router\t\tConfigures interfaces per lab1(a) instructions"
-    echo -e "  [flag|optional]\t\t<path> generates configuration script"
+    echo -e "  [arg]\t\t<cidr> cidr for ip addresses."
+    echo -e "  [flag|optional]\t\t<path> generates configuration script."
     echo -e "  and stores it at given <path>. By default it is stored at $HOME/IPaddr.exec"
     echo -e "  check-config\t\tChecks Configuration"
     echo -e "  interface-status\t\tShows network interfaces status"
@@ -51,20 +55,28 @@ function network_lab1() {
     while [[ $# -gt 0 ]]; do
         local key="$1"
         case "$key" in
-        user-stats)
-            if [[ "$2" != "--name" ]]; then
-                log_error "[$2] is an invalid flag. existing..."
+        configure-router)
+            if [[ $# -gt 3 ]]; then
+                lab1_help
                 exit 1
             fi
-            if [[ $# == 2 ]]; then
-                log_error "lab1 username is needed. existing..."
-                exit 1
+            local path=$(pwd)
+            local res
+            local interface
+            interface=eth0
+            if [[ $# == 3 ]]; then
+                if [[ "$2" != "--path" ]]; then
+                    log_error "[$2] is an invalid flag. existing..."
+                    exit 1
+                fi
+                path = "$2"
+                res=$(generate_config_line $interface "$3" "3")
+
+            else
+                res=$(generate_config_line $interface "$2" "3")
+
             fi
-            pushd "$path" >/dev/null 2>&1
-            res=$(lab1_user_stats "$3")
             log_info "$res"
-            [[ "$?" != 0 ]] && popd
-            popd >/dev/null 2>&1
             shift
             exit
             ;;
@@ -83,3 +95,8 @@ function network_lab1() {
 }
 export -f network_lab1
 network_lab1 "$@"
+
+# ASSUME_YES="no"
+# SILENT="no"
+
+# ask_user "Private network name" "pnetwork" "$ASSUME_YES" "$SILENT" "PRIVATE_NET_NAME"

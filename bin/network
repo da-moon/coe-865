@@ -3,6 +3,8 @@
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/env/env.sh"
 # shellcheck source=./lib/log/log.sh
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/log/log.sh"
+# shellcheck source=./lib/io/io.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/io/io.sh"
 
 # https://gist.github.com/waylan/4080362
 function help() {
