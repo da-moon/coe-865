@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# shellcheck source=./lib/env/env.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/env/env.sh"
+# shellcheck source=./lib/log/log.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/log/log.sh"
+# shellcheck source=./lib/lab1/lab1.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/lab1/lab1.sh"
+# shellcheck source=./lib/assert/assert.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/assert/assert.sh"
+
+function lab1_help() {
+    echo
+    echo "Usage: [network lab1 | network_lab1] [OPTIONAL ARG] [COMMAND | COMMAND <FLAG> <ARG>]"
+    echo
+    echo
+    echo -e "[Synopsis]:\tDemo for lab1."
+    echo
+    echo "Commands:"
+    echo
+    echo -e "  configure-router\t\tConfigures interfaces per lab1(a) instructions"
+    echo -e "  [flag|optional]\t\t<path> generates configuration script"
+    echo -e "  and stores it at given <path>. By default it is stored at $HOME/IPaddr.exec"
+    echo -e "  check-config\t\tChecks Configuration"
+    echo -e "  interface-status\t\tShows network interfaces status"
+    echo -e "  enable-ip-forwarding\t\tEnables ip forwarding "
+    echo -e "  disable-ip-forwarding\t\tDisables ip forwarding"
+    echo -e "  disable-interface\t\tDisables a network interface"
+    echo -e "  [arg]\t\t<name> target interface name"
+    echo -e "  enable-interface\t\tEnables a network interface"
+    echo -e "  [arg]\t\t<name> target interface name"
+    echo
+    echo "Example:"
+    echo
+    echo "  network lab1 \\"
+    echo "    --configure-router"
+    echo
+    echo "  network lab1 \\"
+    echo "    --disable-interface eth0"
+    echo
+}
+function network_lab1() {
+    if [[ $# == 0 ]]; then
+        lab1_help
+        exit 1
+    fi
+    if [[ $# -gt 5 ]]; then
+        lab1_help
+        exit 1
+    fi
+    while [[ $# -gt 0 ]]; do
+        local key="$1"
+        case "$key" in
+        user-stats)
+            if [[ "$2" != "--name" ]]; then
+                log_error "[$2] is an invalid flag. existing..."
+                exit 1
+            fi
+            if [[ $# == 2 ]]; then
+                log_error "lab1 username is needed. existing..."
+                exit 1
+            fi
+            pushd "$path" >/dev/null 2>&1
+            res=$(lab1_user_stats "$3")
+            log_info "$res"
+            [[ "$?" != 0 ]] && popd
+            popd >/dev/null 2>&1
+            shift
+            exit
+            ;;
+        --help)
+            lab1_help
+            exit
+            ;;
+        *)
+            log_error "Unrecognized option: $key"
+            echo -e "\t\t\t\tRun '$(basename "$0") --help' for a list of known subcommands." >&2
+            exit 1
+            ;;
+        esac
+        shift
+    done
+}
+export -f network_lab1
+network_lab1 "$@"

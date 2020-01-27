@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# shellcheck source=./lib/env/env.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/env/env.sh"
+# shellcheck source=./lib/log/log.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/log/log.sh"
+
+# https://gist.github.com/waylan/4080362
+function help() {
+    echo
+    echo -e "[Usage]:\t$progname [OPTIONS] [Subcommands]"
+    echo -e "[TIP]:\t\tuse --help flag to read documentation, eg $progname provision --help."
+    echo
+    echo "Subcommands:"
+    echo
+    echo -e "  lab1\t\tHelpers for operations relating lab 1."
+    echo
+    echo "Example:"
+    echo
+    echo "  $progname \\"
+    echo "    git --help"
+    echo
+}
+export -f help
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/cli/cli.sh" "$@"

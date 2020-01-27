@@ -1,0 +1,14 @@
+{
+    "go.useLanguageServer": true,
+    "editor.formatOnSave": true,
+    "emeraldwalk.runonsave": {
+        "autoClearConsole": true,
+        "commands": [
+            {
+                "match": "\\.sh$",
+                "isAsync": true,
+                "cmd": "shellcheck/shellcheck"
+            }
+        ]
+    }
+}

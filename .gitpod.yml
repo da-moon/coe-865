@@ -1,0 +1,10 @@
+image:
+  file: .gitpod.Dockerfile
+tasks:
+  - command: chmod +x shellcheck/shellcheck
+vscode:
+  extensions:
+    - wmaurer.change-case@1.0.0:EFbL568cjs07Ajw2vuXcpw==
+    - rogalmic.bash-debug@0.3.6:hhV/gdy73rSEyvmOz0JctQ==
+    - foxundermoon.shell-format@6.1.3:LHLH5t1PD70sgW63oXhV0A==
+    - emeraldwalk.RunOnSave@0.2.0:6DpPyy2kCQ1Ug+O4phQ/Lw==
