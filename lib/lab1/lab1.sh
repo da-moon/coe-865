@@ -47,11 +47,15 @@ EOF
 }
 
 function turn_off_ip_forwarding() {
-    echo 0 >/proc/sys/net/ipv4/ip_forward
+    cat >/proc/sys/net/ipv4/ip_forward <<EOF
+    0
+EOF
     log_info "IP Forwarding was turned off successfully"
 }
 function turn_on_ip_forwarding() {
-    echo 1 >/proc/sys/net/ipv4/ip_forward
+    cat >/proc/sys/net/ipv4/ip_forward <<EOF
+    1
+EOF
     log_info "IP Forwarding was turned on successfully"
 }
 function show_interface_status() {
