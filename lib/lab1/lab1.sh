@@ -62,10 +62,6 @@ function show_interface_status() {
     log_info "Showing interface status with /sbin/ifconfig"
     /sbin/ifconfig -a
 }
-function check_configuration() {
-    log_info "Checking configuration"
-    /sbin/ifconfig and netstat –i
-}
 function enable_network_interface() {
     local -r interface="$1"
     assert_not_empty "interface" "$interface" "interface name is needed as an input"
@@ -126,8 +122,9 @@ function gen_config_R9() {
 # Damoon Azarpazhooh 500664523
 /sbin/ifconfig eth0 10.3.1.1 netmask 255.255.255.0 up
 /sbin/ifconfig eth1 10.3.2.2 netmask 255.255.255.0 up
-
 EOF
+    chmod +x "$target_path"
+
 }
 function gen_config_R10() {
     local target_path="$1"
@@ -137,6 +134,8 @@ function gen_config_R10() {
 /sbin/ifconfig eth0 10.3.4.1 netmask 255.255.255.0 up
 /sbin/ifconfig eth1 10.3.1.2 netmask 255.255.255.0 up
 EOF
+    chmod +x "$target_path"
+
 }
 function gen_config_R11() {
     local target_path="$1"
@@ -147,6 +146,8 @@ function gen_config_R11() {
 /sbin/ifconfig eth1 10.3.4.2 netmask 255.255.255.0 up
 
 EOF
+    chmod +x "$target_path"
+
 }
 function gen_config_R12() {
     local target_path="$1"
@@ -156,33 +157,132 @@ function gen_config_R12() {
 /sbin/ifconfig eth0 10.3.2.1 netmask 255.255.255.0 up
 /sbin/ifconfig eth1 10.3.3.2 netmask 255.255.255.0 up
 EOF
+    chmod +x "$target_path"
+
 }
 ###################################
+# R11 Server
+# R10 Client
+function server_dns_setup() {
+    local zone="$1"
+    local client="$2"
+    local server="$3"
+    local server_ip=$(echo $server | cut -d'/' -f1)
+    log_info "generating $zone zone file for server $server_ip and client $client"
+    generate_dns_zonefile $zone $client $server_ip
+    log_info "generating /etc/named.conf file for zone $zone and server $server"
+    generate_named_conf "$zone" "$server"
+    log_info "generating /etc/resolv.conf file for zone $zone and server $server_ip"
+    generate_resolv_conf "$zone" "$server_ip"
+}
+function client_dns_setup() {
+    local zone="$1"
+    local server_ip="$2"
+    log_info "generating /etc/resolv.conf file for zone $zone and server $server_ip"
+    generate_resolv_conf "$zone" "$server_ip"
+}
 function generate_dns_zonefile() {
-    local target_path="$(pwd)/sample.zone"
-    local domain="my-site.com"
+    local target_path="/etc/sample.zone"
+    local zone="$1"
+    local client="$2"
+    local server_ip="$3"
     local TTL=86400
-    cat >"$target_path" <<EOF
-\$TTL  $TTL
-$domain.        IN      SOA      PC4.$domain.
-hostmaster@$domain. (
-                        1 ; serial
-                        28800 ; refresh
-                        7200 ; retry
-                        604800 ; expire
-                        $TTL ; ttl
-                    )
+    if is_root; then
+        cat >"$target_path" <<EOF
+\$TTL $TTL
+\$ORIGIN $zone.
+@ 1D IN SOA dns.$zone. hostmaster.$zone. (
+                        1       ; serial
+                        3H      ; refresh
+                        15M     ; retry
+                        1W      ; expiry
+                        1D )    ; minimum
 ;
-$domain.        IN      NS        PC4.$domain.
 ;
-localhost                   A         127.0.0.1
-PC4.$domain.    A       10.0.1.41
-PC3.$domain.    A       10.0.1.31
-PC2.$domain.    A       10.0.1.21
-PC1.$domain.    A       10.0.1.11
-}
+@ 1D IN NS dns.$zone            ; inet address of the name server
+1D IN MX 10 mail.$zone          ; mail server
+;
+; dns and mail server addresses
+;
+dns IN A $server_ip
+mail IN A $server_ip
+;
+; address
+;
+client IN A $client
 EOF
+    else
+        log_error "Cannot generate $target_path since the script was not invoked with sudo"
+        exit 1
+    fi
+
 }
+###################################
+function generate_named_conf() {
+    local target_path="/etc/named.conf"
+    local file="/etc/sample.zone"
+    local zone="$1"
+    local server_cidr="$2"
+    if is_root; then
+        log_info "Backing up $target_path to $target_path.bac"
+        cp "$target_path" "$target_path.bac"
+
+        cat >"$target_path" <<EOF
+options {
+        listen-on port 53 { 127.0.0.1; };
+        listen-on-v6 port 53 { ::1; };
+        directory       "/var/named";
+        dump-file       "/var/named/data/cache_dump.db";
+        statistics-file "/var/named/data/named_stats.txt";
+        memstatistics-file "/var/named/data/named_mem_stats.txt";
+        allow-query     { localhost;$server_cidr; };
+        recursion yes;
+};
+
+logging {
+        channel default_debug {
+                file "data/named.run";
+                severity dynamic;
+        };
+};
+
+zone "." IN {
+        type hint;
+        file "named.ca";
+};
+zone "$zone"  {
+        type master;
+        notify no;
+        allow-query { any; };
+        file "$file";
+};
+include "/etc/named.rfc1912.zones";
+EOF
+    else
+        log_error "Cannot generate $target_path since the script was not invoked with sudo"
+        exit 1
+    fi
+}
+
+###################################
+function generate_resolv_conf() {
+    local target_path="/etc/resolv.conf"
+    local zone="$1"
+    local server_ip="$2"
+    if is_root; then
+        log_info "Backing up $target_path to $target_path.bac"
+        cp "$target_path" "$target_path.bac"
+        cat >"$target_path" <<EOF
+domain $zone
+search $zone
+nameserver $server_ip
+EOF
+    else
+        log_error "Cannot generate $target_path since the script was not invoked with sudo"
+        exit 1
+    fi
+}
+
 ###################################
 # https://github.com/jeromebarbier/hpe-project/blob/master/vm_tools/generate_heat_template.sh
 function generate_subnet() {
