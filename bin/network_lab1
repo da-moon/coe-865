@@ -35,6 +35,7 @@ function lab1_help() {
     echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
     echo -e "  generate-dns-zonefile\t\tGenerates a dns zonefile"
     echo -e "  list-routers\t\t\t\tlists routers and shows interface configuration"
+    echo -e "  show-routing-table\t\t\t\tshows the routing table"
     echo -e "  check-config\t\t\t\tChecks Configuration"
     echo -e "  interface-status\t\t\tShows network interfaces status"
     echo -e "  enable-ip-forwarding\t\t\tEnables ip forwarding "
@@ -213,6 +214,11 @@ function network_lab1() {
             fi
             local interface="$2"
             enable_network_interface "$interface"
+            shift
+            exit
+            ;;
+        show-routing-table)
+            show_routing_table
             shift
             exit
             ;;
