@@ -3,6 +3,6 @@
 ## Path Mod
 
 ```shell
-echo "export PATH="$(pwd)/bin:'$PATH'"" >> ~/.bashrc
+echo "export PATH="$(pwd)/bin:/sbin:'$PATH'"" >> ~/.bashrc
 source ~/.bashrc
 ```

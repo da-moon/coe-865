@@ -23,11 +23,17 @@ function lab1_help() {
     echo
     echo "Commands:"
     echo
-    echo -e "  generate-interface-config\t\tConfigures interfaces per lab1(a) instructions"
+    echo -e "  generate-random-interface-config\t\tConfigures interfaces with random ip per"
     echo -e "  \t\t\t\t\t-[arg]<cidr> cidr for ip addresses."
     echo -e "  \t\t\t\t\t-[flag|optional] <path> generates configuration script."
     echo -e "  \t\t\t\t\tand stores it at given <path>."
     echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
+    echo -e "  generate-interface-config\t\tConfigures interfaces with ip per lab1(a) instructions"
+    echo -e "  \t\t\t\t\t-[arg]<machnie-number> machine number to generate configuartion for."
+    echo -e "  \t\t\t\t\t-[flag|optional] <path> generates configuration script."
+    echo -e "  \t\t\t\t\tand stores it at given <path>."
+    echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
+    echo -e "  generate-dns-zonefile\t\tGenerates a dns zonefile"
     echo -e "  list-routers\t\t\t\tlists routers and shows interface configuration"
     echo -e "  check-config\t\t\t\tChecks Configuration"
     echo -e "  interface-status\t\t\tShows network interfaces status"
@@ -41,7 +47,7 @@ function lab1_help() {
     echo "Example:"
     echo
     echo "  network lab1 \\"
-    echo "    generate-interface-config 10.1.1.0/24"
+    echo "    generate-random-interface-config 10.1.1.0/24"
     echo
     echo "  network lab1 \\"
     echo "    interface-status"
@@ -61,7 +67,7 @@ function network_lab1() {
     while [[ $# -gt 0 ]]; do
         local key="$1"
         case "$key" in
-        generate-interface-config)
+        generate-random-interface-config)
             if [[ $# -gt 3 ]]; then
                 lab1_help
                 exit 1
@@ -84,6 +90,62 @@ function network_lab1() {
             shift
             exit
             ;;
+        generate-interface-config)
+            if [[ $# -gt 3 ]]; then
+                lab1_help
+                exit 1
+            fi
+            local target_path=$(pwd)/IPaddr.exec
+            local machine_name
+            if [[ $# == 3 ]]; then
+                if [[ "$2" != "--path" ]]; then
+                    log_error "[$2] is an invalid flag. existing..."
+                    exit 1
+                fi
+                target_path = "$2"
+                machine_name="$3"
+            else
+                machine_name="$2"
+            fi
+            case "$machine_name" in
+            r9)
+                gen_config_R9 "$target_path"
+                shift
+                exit
+                ;;
+            r10)
+                gen_config_R10 "$target_path"
+                shift
+                exit
+                ;;
+            r11)
+                gen_config_R11 "$target_path"
+                shift
+                exit
+                ;;
+            r12)
+                gen_config_R12 "$target_path"
+                shift
+                exit
+                ;;
+            *)
+                log_warn "at this point the script can't generate config file for "$machine_name""
+                shift
+                exit
+                ;;
+            esac
+
+            $(generate_config "$target_path")
+
+            shift
+            exit
+            ;;
+        generate-dns-zonefile)
+            generate_dns_zonefile
+            shift
+            exit
+            ;;
+
         list-routers)
             if [[ $# != 1 ]]; then
                 lab1_help

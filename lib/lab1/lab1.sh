@@ -90,30 +90,96 @@ function remove_default_route() {
 }
 ###################################
 # ROUTER Config
+# keel
+# acton
+
 function list_router_information() {
-    log_info "R1: Guelph"
-    log_info "R2: Finch"
-    log_info "R3: Whitby"
-    log_info "R4: Malton "
-    log_info "R5: Brampton"
-    log_info "R6: Bloor"
-    log_info "R7: Kipling "
-    log_info "R8: Dixie"
-    log_info "R9: Danforth"
-    log_info "R10: Caledon"
-    log_info "R11: Acton"
-    log_info "R12: Keele"
-    log_info "R13: Eglinton"
-    log_info "R14: Clarkson"
-    log_info "R15: TheEx"
-    log_info "R16: Appleby"
-    log_info "R17: Ajax"
-    log_info "R18: York "
-    log_info "R19 Oshawa"
-    log_info "R20: Bronte"
+    # log_info "R1: Guelph $(string_blue)"
+    # log_info "R2: Finch $(string_blue)"
+    # log_info "R3: Whitby $(string_blue)"
+    # log_info "R4: Malton $(string_blue)"
+    # log_info "R5: Brampton $(string_blue)"
+    # log_info "R6: Bloor $(string_blue)"
+    # log_info "R7: Kipling $(string_blue)"
+    # log_info "R8: Dixie $(string_blue)"
+    log_info "R9: Danforth $(string_red "ETH0") 10.3.1.1 $(string_yellow "ETH1") 10.3.2.2"
+    log_info "R10: Caledon $(string_red "ETH0") 10.3.4.1 $(string_yellow "ETH1") 10.3.1.2"
+    log_info "R11: Acton $(string_red "ETH0") 10.3.3.1 $(string_yellow "ETH1") 10.3.4.2"
+    log_info "R12: Keele $(string_red "ETH0") 10.3.2.1 $(string_yellow "ETH1") 10.3.3.2"
+    # log_info "R13: Eglinton $(string_blue)"
+    # log_info "R14: Clarkson $(string_blue)"
+    # log_info "R15: TheEx $(string_blue)"
+    # log_info "R16: Appleby $(string_blue)"
+    # log_info "R17: Ajax $(string_blue)"
+    # log_info "R18: York $(string_blue)"
+    # log_info "R19 Oshawa $(string_blue)"
+    # log_info "R20: Bronte $(string_blue)"
+}
+function gen_config_R9() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.3.1.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.3.2.2 netmask 255.255.255.0 up
+
+EOF
+}
+function gen_config_R10() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.3.4.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.3.1.2 netmask 255.255.255.0 up
+EOF
+}
+function gen_config_R11() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.3.3.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.3.4.2 netmask 255.255.255.0 up
+
+EOF
+}
+function gen_config_R12() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.3.2.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.3.3.2 netmask 255.255.255.0 up
+EOF
 }
 ###################################
-
+function generate_dns_zonefile() {
+    local target_path="$(pwd)/sample.zone"
+    local domain="my-site.com"
+    local TTL=86400
+    cat >"$target_path" <<EOF
+\$TTL  $TTL
+$domain.        IN      SOA      PC4.$domain.
+hostmaster@$domain. (
+                        1 ; serial
+                        28800 ; refresh
+                        7200 ; retry
+                        604800 ; expire
+                        $TTL ; ttl
+                    )
+;
+$domain.        IN      NS        PC4.$domain.
+;
+localhost                   A         127.0.0.1
+PC4.$domain.    A       10.0.1.41
+PC3.$domain.    A       10.0.1.31
+PC2.$domain.    A       10.0.1.21
+PC1.$domain.    A       10.0.1.11
+}
+EOF
+}
+###################################
 # https://github.com/jeromebarbier/hpe-project/blob/master/vm_tools/generate_heat_template.sh
 function generate_subnet() {
     # This function generates a new subnetwork
