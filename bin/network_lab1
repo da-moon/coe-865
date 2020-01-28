@@ -110,21 +110,25 @@ function network_lab1() {
             case "$machine_name" in
             r9)
                 gen_config_R9 "$target_path"
+                chmod +x "$target_path"
                 shift
                 exit
                 ;;
             r10)
                 gen_config_R10 "$target_path"
+                chmod +x "$target_path"
                 shift
                 exit
                 ;;
             r11)
                 gen_config_R11 "$target_path"
+                chmod +x "$target_path"
                 shift
                 exit
                 ;;
             r12)
                 gen_config_R12 "$target_path"
+                chmod +x "$target_path"
                 shift
                 exit
                 ;;
@@ -179,7 +183,7 @@ function network_lab1() {
                 lab1_help
                 exit 1
             fi
-
+            turn_on_ip_forwarding
             shift
             exit
             ;;
@@ -188,7 +192,7 @@ function network_lab1() {
                 lab1_help
                 exit 1
             fi
-
+            turn_off_ip_forwarding
             shift
             exit
             ;;
@@ -198,6 +202,7 @@ function network_lab1() {
                 exit 1
             fi
             local interface="$2"
+            disable_network_interface "$interface"
             shift
             exit
             ;;
@@ -207,6 +212,7 @@ function network_lab1() {
                 exit 1
             fi
             local interface="$2"
+            enable_network_interface "$interface"
             shift
             exit
             ;;
