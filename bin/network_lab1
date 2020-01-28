@@ -60,13 +60,14 @@ function lab1_help() {
     echo "    setup-dns-server \\"
     echo "    --zone galaxy.net \\"
     echo "    --server 10.3.4.2/24 \\"
-    echo "    --client 10.3.4.1 \\"
+    echo "    --client 10.3.4.1"
     echo
     echo "  network lab1 \\"
     echo "    setup-dns-client \\"
     echo "    --zone galaxy.net \\"
-    echo "    --server 10.3.4.2 \\"
-    echo echo "  network lab1 \\"
+    echo "    --server 10.3.4.2"
+    echo
+    echo "  network lab1 \\"
     echo "    interface-status"
     echo
     echo "  network lab1 \\"

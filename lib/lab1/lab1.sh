@@ -182,10 +182,10 @@ function client_dns_setup() {
     generate_resolv_conf "$zone" "$server_ip"
 }
 function generate_dns_zonefile() {
-    local target_path="/etc/sample.zone"
     local zone="$1"
     local client="$2"
     local server_ip="$3"
+    local target_path="/var/named/$zone.zone"
     local TTL=86400
     if is_root; then
         cat >"$target_path" <<EOF
@@ -210,6 +210,7 @@ mail IN A $server_ip
 ; address
 ;
 client IN A $client
+server IN A $server_ip
 EOF
     else
         log_error "Cannot generate $target_path since the script was not invoked with sudo"
@@ -220,7 +221,6 @@ EOF
 ###################################
 function generate_named_conf() {
     local target_path="/etc/named.conf"
-    local file="/etc/sample.zone"
     local zone="$1"
     local server_cidr="$2"
     if is_root; then
@@ -254,7 +254,7 @@ zone "$zone"  {
         type master;
         notify no;
         allow-query { any; };
-        file "$file";
+        file "$zone.zone";
 };
 include "/etc/named.rfc1912.zones";
 EOF
@@ -281,91 +281,4 @@ EOF
         log_error "Cannot generate $target_path since the script was not invoked with sudo"
         exit 1
     fi
-}
-
-###################################
-# https://github.com/jeromebarbier/hpe-project/blob/master/vm_tools/generate_heat_template.sh
-function generate_subnet() {
-    # This function generates a new subnetwork
-    CIDR="$1"
-    local netmask
-    NEXT_SUBNET_ID=$(($SUBNET_NR + 1))
-    # Compute new CIDR
-    if [ "$SUBNET_NR" != "1" ]; then
-        # Compute the first IP address of the next network
-        LAST_IP_IN_RANGE=$(ip_int_last_of_range $CIDR)
-        NEXT_NETWORK_IP_AS_INT=$(($LAST_IP_IN_RANGE + 1))
-        NEXT_NETWORK_IP=$(ip_int2string $NEXT_NETWORK_IP_AS_INT)
-        MASK=$(echo $CIDR | cut -d'/' -f2)
-        bit_netmask=$(prefix_to_bit_netmask $MASK)
-        netmask=$(bit_netmask_to_expanded_netmask "$bit_netmask")
-
-        CIDR="$NEXT_NETWORK_IP/$MASK"
-    fi
-
-    GATEWAY=$(ip_int2string $(($(ip_int_last_of_range $CIDR) - 1)))
-    netmask=$(echo $netmask | sed "s, ,\\.,g")
-    echo "$GATEWAY"
-    # eth1 10.1.1.20 netmask 255.255.255.0
-
-    #     echo "  # Private subnetwork #$SUBNET_NR, CIDR=$CIDR, gateway=$GATEWAY
-    #   private_subnet$SUBNET_NR:
-    #     type: OS::Neutron::Subnet
-    #     properties:
-    #       network_id: { get_resource: private_net }
-    #       cidr: $CIDR
-    #       name: $PRIVATE_SUBNET_NAME$SUBNET_NR
-    #       dns_nameservers: [ $DNS ]
-    #       gateway_ip: $GATEWAY
-    #   router_interface$SUBNET_NR:
-    #     type: OS::Neutron::RouterInterface
-    #     properties:
-    #       router_id: { get_resource: router }
-    #       subnet_id: { get_resource: private_subnet$SUBNET_NR }
-    # "
-}
-
-function is_git_available() {
-    if ! os_command_is_installed "git"; then
-        log_error "git is not available. existing..."
-        exit 1
-    fi
-}
-function git_undo_commit() {
-    is_git_available
-    git reset --soft HEAD~
-}
-function git_reset_local() {
-    is_git_available
-    git fetch origin
-    git reset --hard origin/master
-}
-function git_pull_latest() {
-    is_git_available
-    git pull --rebase origin master
-
-}
-function git_list_branches() {
-    is_git_available
-    git branch -a
-}
-function git_repo_size() {
-    is_git_available
-
-    # do not show output of git bundle create {>/dev/null 2>&1} ...
-    git bundle create .tmp-git-bundle --all >/dev/null 2>&1
-    # check for existance of du
-    if ! os_command_is_installed "du"; then
-        log_error "du is not available. existing..."
-        exit 1
-    fi
-    local -r size=$(du -sh .tmp-git-bundle | cut -f1)
-    rm .tmp-git-bundle
-    echo "$size"
-}
-function git_user_stats() {
-    local -r user_name="$1"
-    assert_not_empty "user_name" "$user_name" "git username is needed"
-    res=$(git log --author="$user_name" --pretty=tformat: --numstat | gawk -v GREEN='\033[1;32m' -v PLAIN='\033[0m' -v RED='\033[1;31m' 'BEGIN { add = 0; subs = 0 } { add += $1; subs += $2 } END { printf "Total: %s+%s%s / %s-%s%s\n", GREEN, add, PLAIN, RED, subs, PLAIN }')
-    echo "$res"
 }
