@@ -79,8 +79,14 @@ function show_routing_table() {
     /sbin/route –n
 }
 function remove_default_route() {
-    log_info "removing default route"
-    /sbin/route delete default
+    if is_root; then
+        log_info "removing default route"
+        /sbin/route delete default
+    else
+        log_error "Cannot remove default root since the script was not invoked with sudo"
+        exit 1
+    fi
+
 }
 ###################################
 # ROUTER Config
