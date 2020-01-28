@@ -12,8 +12,8 @@ source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/array/array.s
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/string/string.sh"
 
 export SUBNET_NR=0
-function generate_config_line() {
-    interface="$1"
+function generate_config() {
+    local target_path="$1"
     input="$2"
     local count="$(($3))"
     local netmask
@@ -28,32 +28,24 @@ function generate_config_line() {
             ips=$(array_join " " "$ips" "$temp")
         fi
     done
-    netmask=$(cidr2netmask "$cidr")
-    declare -a result=()
-    for value in ${ips}; do
-        if [ ${#result[@]} -eq 0 ]; then
-            result=$(array_join "\n" "/sbin/ifconfig $interface $value netmask $netmask")
-        else
-            result=$(array_join "\n" "$result" "/sbin/ifconfig $interface $value netmask $netmask")
-        fi
-    done
-    echo $result
-}
-function generate_ipaddr_exec() {
-    local target=$HOME/IPaddr.exec
-    if [[ $# == 1 ]]; then
-        target = "$1"
-    fi
-
-    cat >>"$target" <<EOF
-    /sbin/ifconfig eth1 10.1.1.20 netmask 255.255.255.0 up
-    /sbin/ifconfig eth2 10.1.1.30 netmask 255.255.255.0 up
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
 EOF
-    log_info "Generation of interface setup config file was succesful and it was stored at $target"
-    chmod +x "$target"
-    log_info "setting $target as executable was successful"
+    local INDEX=0
+    netmask=$(cidr2netmask "$cidr")
 
+    for value in ${ips}; do
+        cat >>"$target_path" <<EOF
+/sbin/ifconfig eth${INDEX} $value netmask $netmask up
+EOF
+        let INDEX=${INDEX}+1
+    done
+    log_info "Generation of interface setup config file was succesful and it was stored at $target_path"
+    chmod +x "$target_path"
+    log_info "setting $target_path as executable was successful"
 }
+
 function turn_off_ip_forwarding() {
     echo 0 >/proc/sys/net/ipv4/ip_forward
     log_info "IP Forwarding was turned off successfully"
@@ -90,11 +82,35 @@ function remove_default_route() {
     log_info "removing default route"
     /sbin/route delete default
 }
+###################################
+# ROUTER Config
+function list_router_information() {
+    log_info "R1: Guelph"
+    log_info "R2: Finch"
+    log_info "R3: Whitby"
+    log_info "R4: Malton "
+    log_info "R5: Brampton"
+    log_info "R6: Bloor"
+    log_info "R7: Kipling "
+    log_info "R8: Dixie"
+    log_info "R9: Danforth"
+    log_info "R10: Caledon"
+    log_info "R11: Acton"
+    log_info "R12: Keele"
+    log_info "R13: Eglinton"
+    log_info "R14: Clarkson"
+    log_info "R15: TheEx"
+    log_info "R16: Appleby"
+    log_info "R17: Ajax"
+    log_info "R18: York "
+    log_info "R19 Oshawa"
+    log_info "R20: Bronte"
+}
+###################################
 
 # https://github.com/jeromebarbier/hpe-project/blob/master/vm_tools/generate_heat_template.sh
 function generate_subnet() {
     # This function generates a new subnetwork
-
     CIDR="$1"
     local netmask
     NEXT_SUBNET_ID=$(($SUBNET_NR + 1))

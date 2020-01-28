@@ -10,6 +10,8 @@ source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/lab1/lab1
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/assert/assert.sh"
 # shellcheck source=./lib/io/io.sh
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/io/io.sh"
+# shellcheck source=./lib/array/array.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/array/array.sh"
 
 function lab1_help() {
 
@@ -21,26 +23,34 @@ function lab1_help() {
     echo
     echo "Commands:"
     echo
-    echo -e "  configure-router\t\tConfigures interfaces per lab1(a) instructions"
-    echo -e "  [arg]\t\t<cidr> cidr for ip addresses."
-    echo -e "  [flag|optional]\t\t<path> generates configuration script."
-    echo -e "  and stores it at given <path>. By default it is stored at $HOME/IPaddr.exec"
-    echo -e "  check-config\t\tChecks Configuration"
-    echo -e "  interface-status\t\tShows network interfaces status"
-    echo -e "  enable-ip-forwarding\t\tEnables ip forwarding "
-    echo -e "  disable-ip-forwarding\t\tDisables ip forwarding"
-    echo -e "  disable-interface\t\tDisables a network interface"
-    echo -e "  [arg]\t\t<name> target interface name"
-    echo -e "  enable-interface\t\tEnables a network interface"
-    echo -e "  [arg]\t\t<name> target interface name"
+    echo -e "  generate-interface-config\t\tConfigures interfaces per lab1(a) instructions"
+    echo -e "  \t\t\t\t\t-[arg]<cidr> cidr for ip addresses."
+    echo -e "  \t\t\t\t\t-[flag|optional] <path> generates configuration script."
+    echo -e "  \t\t\t\t\tand stores it at given <path>."
+    echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
+    echo -e "  list-routers\t\t\t\tlists routers and shows interface configuration"
+    echo -e "  check-config\t\t\t\tChecks Configuration"
+    echo -e "  interface-status\t\t\tShows network interfaces status"
+    echo -e "  enable-ip-forwarding\t\t\tEnables ip forwarding "
+    echo -e "  disable-ip-forwarding\t\t\tDisables ip forwarding"
+    echo -e "  disable-interface\t\t\tDisables a network interface"
+    echo -e "  \t\t\t\t\t-[arg]<name> target interface name"
+    echo -e "  enable-interface\t\t\tEnables a network interface"
+    echo -e "  \t\t\t\t\t-[arg]<name> target interface name"
     echo
     echo "Example:"
     echo
     echo "  network lab1 \\"
-    echo "    --configure-router"
+    echo "    generate-interface-config 10.1.1.0/24"
     echo
     echo "  network lab1 \\"
-    echo "    --disable-interface eth0"
+    echo "    interface-status"
+    echo
+    echo "  network lab1 \\"
+    echo "    enable-ip-forwarding"
+    echo
+    echo "  network lab1 \\"
+    echo "    enable-interface eth0"
     echo
 }
 function network_lab1() {
@@ -48,35 +58,93 @@ function network_lab1() {
         lab1_help
         exit 1
     fi
-    if [[ $# -gt 5 ]]; then
-        lab1_help
-        exit 1
-    fi
     while [[ $# -gt 0 ]]; do
         local key="$1"
         case "$key" in
-        configure-router)
+        generate-interface-config)
             if [[ $# -gt 3 ]]; then
                 lab1_help
                 exit 1
             fi
-            local path=$(pwd)
-            local res
-            local interface
-            interface=eth0
+            local target_path=$(pwd)/IPaddr.exec
+            local net_id
             if [[ $# == 3 ]]; then
                 if [[ "$2" != "--path" ]]; then
                     log_error "[$2] is an invalid flag. existing..."
                     exit 1
                 fi
-                path = "$2"
-                res=$(generate_config_line $interface "$3" "3")
-
+                target_path = "$2"
+                net_id="$3"
             else
-                res=$(generate_config_line $interface "$2" "3")
-
+                net_id="$2"
             fi
-            log_info "$res"
+
+            $(generate_config "$target_path" "$net_id" "3")
+
+            shift
+            exit
+            ;;
+        list-routers)
+            if [[ $# != 1 ]]; then
+                lab1_help
+                exit 1
+            fi
+            list_router_information
+            shift
+            exit
+            ;;
+        check-config)
+            if [[ $# != 1 ]]; then
+                lab1_help
+                exit 1
+            fi
+            check_configuration
+            shift
+            exit
+            ;;
+
+        interface-status)
+            if [[ $# != 1 ]]; then
+                lab1_help
+                exit 1
+            fi
+            show_interface_status
+            shift
+            exit
+            ;;
+        enable-ip-forwarding)
+            if [[ $# != 1 ]]; then
+                lab1_help
+                exit 1
+            fi
+
+            shift
+            exit
+            ;;
+        disable-ip-forwarding)
+            if [[ $# != 1 ]]; then
+                lab1_help
+                exit 1
+            fi
+
+            shift
+            exit
+            ;;
+        disable-interface)
+            if [[ $# != 2 ]]; then
+                lab1_help
+                exit 1
+            fi
+            local interface="$2"
+            shift
+            exit
+            ;;
+        enable-interface)
+            if [[ $# != 2 ]]; then
+                lab1_help
+                exit 1
+            fi
+            local interface="$2"
             shift
             exit
             ;;
