@@ -86,6 +86,9 @@ function lab1_help() {
     echo "Example:"
     echo
     echo "  network lab1 \\"
+    echo "    run-scenario-a r1"
+    echo
+    echo "  network lab1 \\"
     echo "    generate-random-interface-config 10.1.1.0/24"
     echo
     echo "  network lab1 \\"

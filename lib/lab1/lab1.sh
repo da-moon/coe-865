@@ -18,6 +18,7 @@ function run_lab1a_scenario() {
         exit 1
     fi
     if is_root; then
+        turn_on_ip_forwarding
         local key="$1"
         case "$key" in
         r1)
@@ -27,6 +28,11 @@ function run_lab1a_scenario() {
             /sbin/ifconfig eth1 10.1.1.1 netmask 255.255.255.0 up
             log_info "Setting $(string_green "ETH2") 10.1.2.2"
             /sbin/ifconfig eth2 10.1.2.2 netmask 255.255.255.0 up
+            log_info "Setting access for r1-eth1 to reach r2-eth0 (10.1.4.0) through r1-eth0 (10.1.1.2)"
+            /sbin/route add -net 10.1.4.0 netmask 255.255.255.0 gw 10.1.1.2 dev eth0
+            log_info "Setting access for r1-eth2 to reach r3-eth0 (10.1.3.0) through r4-eth1 (10.1.2.1)"
+            /sbin/route add -net 10.1.3.0 netmask 255.255.255.0 gw 10.1.2.1 dev eth1
+
             shift
             exit
             ;;
@@ -37,8 +43,11 @@ function run_lab1a_scenario() {
             /sbin/ifconfig eth1 10.1.4.1 netmask 255.255.255.0 up
             log_info "Setting access for r2-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r1-eth1 (10.1.1.1)"
             /sbin/route add -host 192.168.98.10 gw 10.1.1.1 dev eth0
-            log_info "Setting access for r2-eth1 to reach r1-eth1 (10.1.1.0) through r4-eth0 (10.1.4.2)"
-            /sbin/route add -net 10.1.2.0 netmask 255.255.255.0 gw 10.1.4.2 dev eth1
+            log_info "Setting access for r2-eth0 to reach r1-eth1 (10.1.2.0) through r1-eth0 (10.1.1.1)"
+            /sbin/route add -net 10.1.2.0 netmask 255.255.255.0 gw 10.1.1.1 dev eth0
+            log_info "Setting access for r2-eth1 to reach r3-eth1 (10.1.3.0) through r4-eth1 (10.1.4.2)"
+            /sbin/route add -net 10.1.3.0 netmask 255.255.255.0 gw 10.1.4.2 dev eth1
+
             shift
             exit
             ;;
@@ -49,9 +58,10 @@ function run_lab1a_scenario() {
             /sbin/ifconfig eth1 10.1.3.2 netmask 255.255.255.0 up
             log_info "Setting access for r3-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r1-eth2 (10.1.2.2)"
             /sbin/route add -host 192.168.98.10 gw 10.1.2.2 dev eth0
-            log_info "Setting access for r3-eth1 to reach r1-eth1 (10.1.1.0) through r4-eth0 (10.1.3.1)"
-            /sbin/route add -net 10.1.1.0 netmask 255.255.255.0 gw 10.1.3.1 dev eth1
-
+            log_info "Setting access for r3-eth1 to reach r1-eth1 (10.1.1.0) through r4-eth0 (10.1.2.2)"
+            /sbin/route add -net 10.1.1.0 netmask 255.255.255.0 gw 10.1.2.2 dev eth0
+            log_info "Setting access for r3-eth1 to reach r1-eth1 (10.1.4.0) through r4-eth1 (10.1.4.1)"
+            /sbin/route add -net 10.1.4.0 netmask 255.255.255.0 gw 10.1.4.1 dev eth1
             shift
             exit
             ;;
@@ -594,7 +604,7 @@ option routers 10.1.1.9;
 
         host jupiter {
                 hardware ethernet $mac_address;
-                fixed-address 10.1.1.100;
+               #fixed-address 10.1.1.100;
         }
 
 }
