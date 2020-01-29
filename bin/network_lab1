@@ -184,6 +184,46 @@ function network_lab1() {
                 machine_name="$2"
             fi
             case "$machine_name" in
+            r1)
+                gen_config_R1 "$target_path"
+                shift
+                exit
+                ;;
+            r2)
+                gen_config_R2 "$target_path"
+                shift
+                exit
+                ;;
+            r3)
+                gen_config_R3 "$target_path"
+                shift
+                exit
+                ;;
+            r4)
+                gen_config_R4 "$target_path"
+                shift
+                exit
+                ;;
+            r5)
+                gen_config_R5 "$target_path"
+                shift
+                exit
+                ;;
+            r6)
+                gen_config_R6 "$target_path"
+                shift
+                exit
+                ;;
+            r7)
+                gen_config_R7 "$target_path"
+                shift
+                exit
+                ;;
+            r8)
+                gen_config_R8 "$target_path"
+                shift
+                exit
+                ;;
             r9)
                 gen_config_R9 "$target_path"
                 shift
@@ -201,6 +241,46 @@ function network_lab1() {
                 ;;
             r12)
                 gen_config_R12 "$target_path"
+                shift
+                exit
+                ;;
+            r13)
+                gen_config_R13 "$target_path"
+                shift
+                exit
+                ;;
+            r14)
+                gen_config_R14 "$target_path"
+                shift
+                exit
+                ;;
+            r15)
+                gen_config_R15 "$target_path"
+                shift
+                exit
+                ;;
+            r16)
+                gen_config_R16 "$target_path"
+                shift
+                exit
+                ;;
+            r17)
+                gen_config_R17 "$target_path"
+                shift
+                exit
+                ;;
+            r18)
+                gen_config_R18 "$target_path"
+                shift
+                exit
+                ;;
+            r19)
+                gen_config_R19 "$target_path"
+                shift
+                exit
+                ;;
+            r20)
+                gen_config_R20 "$target_path"
                 shift
                 exit
                 ;;

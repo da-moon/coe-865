@@ -94,26 +94,115 @@ function remove_default_route() {
 # acton
 
 function list_router_information() {
-    # log_info "R1: Guelph $(string_blue)"
-    # log_info "R2: Finch $(string_blue)"
-    # log_info "R3: Whitby $(string_blue)"
-    # log_info "R4: Malton $(string_blue)"
-    # log_info "R5: Brampton $(string_blue)"
-    # log_info "R6: Bloor $(string_blue)"
-    # log_info "R7: Kipling $(string_blue)"
-    # log_info "R8: Dixie $(string_blue)"
+    log_info "R1: Guelph $(string_red "ETH0") 192.168.98.10 $(string_yellow "ETH1") 10.1.1.1 $(string_green "ETH2") 10.1.2.2"
+    log_info "R2: Finch $(string_red "ETH0") 10.1.6.1 $(string_yellow "ETH1") 10.1.4.1 $(string_green "ETH2") 10.1.1.2"
+    log_info "R3: Whitby $(string_red "ETH0") 10.1.2.1 $(string_yellow "ETH1") 10.1.7.1 $(string_green "ETH2") 10.1.3.2"
+    log_info "R4: Malton $(string_red "ETH0") 10.1.3.1 $(string_yellow "ETH1") 10.1.5.1 $(string_green "ETH2") 10.1.4.2"
+    log_info "R5: Brampton $(string_red "ETH0") 10.2.4.1 $(string_yellow "ETH1") 10.2.1.2"
+    log_info "R6: Bloor $(string_red "ETH0") 10.2.3.1 $(string_yellow "ETH1") 10.2.4.2"
+    log_info "R7: Kipling $(string_red "ETH0") 10.2.2.1 $(string_yellow "ETH1") 10.2.3.2 $(string_green "ETH2") 10.1.6.2"
+    log_info "R8: Dixie $(string_red "ETH0") 10.2.1.1 $(string_yellow "ETH1") 10.2.2.2"
     log_info "R9: Danforth $(string_red "ETH0") 10.3.1.1 $(string_yellow "ETH1") 10.3.2.2"
     log_info "R10: Caledon $(string_red "ETH0") 10.3.4.1 $(string_yellow "ETH1") 10.3.1.2"
     log_info "R11: Acton $(string_red "ETH0") 10.3.3.1 $(string_yellow "ETH1") 10.3.4.2"
-    log_info "R12: Keele $(string_red "ETH0") 10.3.2.1 $(string_yellow "ETH1") 10.3.3.2"
-    # log_info "R13: Eglinton $(string_blue)"
-    # log_info "R14: Clarkson $(string_blue)"
-    # log_info "R15: TheEx $(string_blue)"
-    # log_info "R16: Appleby $(string_blue)"
-    # log_info "R17: Ajax $(string_blue)"
-    # log_info "R18: York $(string_blue)"
-    # log_info "R19 Oshawa $(string_blue)"
-    # log_info "R20: Bronte $(string_blue)"
+    log_info "R12: Keele $(string_red "ETH0") 10.3.2.1 $(string_yellow "ETH1") 10.3.3.2 $(string_green "ETH2") 10.1.4.3"
+    log_info "R13: Eglinton $(string_red "ETH0") 10.4.1.1 $(string_yellow "ETH1") 10.4.2.2"
+    log_info "R14: Clarkson $(string_red "ETH0") 10.1.5.2 $(string_yellow "ETH1") 10.4.4.1 $(string_green "ETH2") 10.4.1.2"
+    log_info "R15: TheEx $(string_red "ETH0") 10.4.3.1 $(string_yellow "ETH1") 10.4.4.2"
+    log_info "R16: Appleby $(string_red "ETH0") 10.4.2.1 $(string_yellow "ETH1") 10.4.3.2"
+    log_info "R17: Ajax $(string_red "ETH0") 10.5.1.1 $(string_yellow "ETH1") 10.5.2.2"
+    log_info "R18: York $(string_red "ETH0") 10.1.7.2 $(string_yellow "ETH1") 10.5.4.2 $(string_green "ETH2") 10.5.1.2"
+    log_info "R19 Oshawa $(string_red "ETH0") 10.5.4.1 $(string_yellow "ETH1") 10.5.3.1"
+    log_info "R20: Bronte $(string_red "ETH0") 10.5.2.1 $(string_yellow "ETH1") 10.5.3.2"
+}
+
+function gen_config_R1() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 192.168.98.10 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.1.1.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.1.2.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+function gen_config_R2() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.1.6.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.1.4.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.1.1.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+
+function gen_config_R3() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.1.2.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.1.7.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.1.3.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+function gen_config_R4() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.1.3.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.1.5.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.1.4.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+
+function gen_config_R5() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.2.4.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.2.1.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+function gen_config_R6() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.2.3.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.2.4.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+function gen_config_R7() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.2.2.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.2.3.2 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.1.6.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+
+function gen_config_R8() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.2.1.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.2.2.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
 }
 function gen_config_R9() {
     local target_path="$1"
@@ -156,9 +245,103 @@ function gen_config_R12() {
 # Damoon Azarpazhooh 500664523
 /sbin/ifconfig eth0 10.3.2.1 netmask 255.255.255.0 up
 /sbin/ifconfig eth1 10.3.3.2 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.1.4.3 netmask 255.255.255.0 up
 EOF
     chmod +x "$target_path"
 
+}
+
+function gen_config_R13() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.4.1.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.4.2.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+
+}
+
+function gen_config_R14() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.1.5.2 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.4.4.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.4.1.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+
+}
+
+function gen_config_R15() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.4.3.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.4.4.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+
+}
+
+function gen_config_R16() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.4.2.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.4.3.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+
+}
+function gen_config_R17() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.5.1.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.5.2.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+
+}
+
+function gen_config_R18() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.1.7.2 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.5.4.2 netmask 255.255.255.0 up
+/sbin/ifconfig eth2 10.5.1.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+
+}
+function gen_config_R19() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.5.4.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.5.3.1 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
+}
+function gen_config_R20() {
+    local target_path="$1"
+    cat >"$target_path" <<EOF
+#! /usr/bin/env bash
+# Damoon Azarpazhooh 500664523
+/sbin/ifconfig eth0 10.5.2.1 netmask 255.255.255.0 up
+/sbin/ifconfig eth1 10.5.3.2 netmask 255.255.255.0 up
+EOF
+    chmod +x "$target_path"
 }
 ###################################
 # R11 Server
@@ -229,7 +412,7 @@ function generate_named_conf() {
 
         cat >"$target_path" <<EOF
 options {
-        listen-on port 53 { 127.0.0.1; };
+        listen-on port 53 { any; };
         listen-on-v6 port 53 { ::1; };
         directory       "/var/named";
         dump-file       "/var/named/data/cache_dump.db";
