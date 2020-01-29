@@ -41,6 +41,8 @@ function run_lab1a_scenario() {
             /sbin/ifconfig eth0 10.1.1.2 netmask 255.255.255.0 up
             log_info "Setting $(string_yellow "ETH1") 10.1.4.1"
             /sbin/ifconfig eth1 10.1.4.1 netmask 255.255.255.0 up
+            log_info "disabling $(string_yellow "ETH2")"
+            /sbin/ifconfig eth2 down
             log_info "Setting access for r2-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r1-eth1 (10.1.1.1)"
             /sbin/route add -host 192.168.98.10 gw 10.1.1.1 dev eth0
             log_info "Setting access for r2-eth0 to reach r1-eth1 (10.1.2.0) through r1-eth0 (10.1.1.1)"
@@ -56,6 +58,8 @@ function run_lab1a_scenario() {
             /sbin/ifconfig eth0 10.1.2.1 netmask 255.255.255.0 up
             log_info "Setting $(string_green "ETH1") 10.1.3.2"
             /sbin/ifconfig eth1 10.1.3.2 netmask 255.255.255.0 up
+            log_info "disabling $(string_yellow "ETH2")"
+            /sbin/ifconfig eth2 down
             log_info "Setting access for r3-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r1-eth2 (10.1.2.2)"
             /sbin/route add -host 192.168.98.10 gw 10.1.2.2 dev eth0
             log_info "Setting access for r3-eth1 to reach r1-eth1 (10.1.1.0) through r4-eth0 (10.1.2.2)"
@@ -70,6 +74,8 @@ function run_lab1a_scenario() {
             /sbin/ifconfig eth0 10.1.3.1 netmask 255.255.255.0 up
             log_info "Setting $(string_yellow "ETH1") 10.1.4.2"
             /sbin/ifconfig eth1 10.1.4.2 netmask 255.255.255.0 up
+            log_info "disabling $(string_yellow "ETH2")"
+            /sbin/ifconfig eth2 down
             log_info "Setting access for r4-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r3-eth1 (10.1.3.2)"
             /sbin/route add -host 192.168.98.10 gw 10.1.3.2 dev eth0
             log_info "Setting access for r4-eth1 to reach r1-eth1 (10.1.1.0) through r2-eth1 (10.1.4.1)"
