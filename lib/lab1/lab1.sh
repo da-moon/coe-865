@@ -23,9 +23,9 @@ function run_lab1a_scenario() {
         r1)
             log_info "Setting $(string_red "ETH0") 192.168.98.10"
             /sbin/ifconfig eth0 192.168.98.10 netmask 255.255.255.0 up
-            log_info"Setting $(string_yellow "ETH1") 10.1.1.1"
+            log_info "Setting $(string_yellow "ETH1") 10.1.1.1"
             /sbin/ifconfig eth1 10.1.1.1 netmask 255.255.255.0 up
-            log_info"Setting $(string_green "ETH2") 10.1.2.2"
+            log_info "Setting $(string_green "ETH2") 10.1.2.2"
             /sbin/ifconfig eth2 10.1.2.2 netmask 255.255.255.0 up
             shift
             exit
