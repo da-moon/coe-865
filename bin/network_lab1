@@ -211,7 +211,6 @@ function network_lab1() {
             ;;
         setup-dhcp-server)
             local interface=""
-            local server_interface=""
             local zone=""
             local start_range=""
             local end_range=""
@@ -220,10 +219,6 @@ function network_lab1() {
                 case "$choice" in
                 --interface)
                     interface="$2"
-                    shift
-                    ;;
-                --server-interface)
-                    server_interface="$2"
                     shift
                     ;;
                 --zone)
@@ -244,7 +239,6 @@ function network_lab1() {
                 esac
             done
             assert_not_empty "interface" "$interface" "interface for dhcpd is needed"
-            assert_not_empty "server_interface" "$server_interface" "interface for dhcp server is needed"
             assert_not_empty "zone" "$zone" "interface for dhcpd is needed"
             assert_not_empty "start_range" "$start_range" "dhcp ip start range is needed"
             assert_not_empty "end_range" "$end_range" "dhcp ip end range is needed"
@@ -255,8 +249,8 @@ function network_lab1() {
             # service dhcpd restart
             # sleep 5
             gen_dhcpd_conf "$interface" "$zone" "$start_range" "$end_range"
-            log_info "Starting dhcp server at $server_interface"
-            /usr/sbin/dhcpd "$server_interface"
+            log_info "Starting dhcp server at $interface"
+            /usr/sbin/dhcpd "$interface"
             shift
             exit
             ;;
