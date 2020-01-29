@@ -139,7 +139,7 @@ function network_lab1() {
                 exit 1
             fi
             machine_name="$2"
-            run_lab1a_scenario "machine_name"
+            run_lab1a_scenario "$machine_name"
             shift
             exit
             ;;
