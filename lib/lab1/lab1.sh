@@ -447,7 +447,6 @@ EOF
     fi
 }
 
-###################################
 function generate_resolv_conf() {
     local target_path="/etc/resolv.conf"
     local zone="$1"
@@ -462,6 +461,97 @@ nameserver $server_ip
 EOF
     else
         log_error "Cannot generate $target_path since the script was not invoked with sudo"
+        exit 1
+    fi
+}
+###################################
+# DHCP Setup
+function set_dhcp_dargs() {
+    if [[ $# != 1 ]]; then
+        log_error "Wrong number of argument was passed to set_dhcp_dargs method"
+        exit 1
+    fi
+    local target_path="/etc/sysconfig/dhcpd"
+    local interface="$1"
+    if is_root; then
+        log_info "Backing up $target_path to $target_path.bac"
+        sed -i "/DHCPDARGS/c\DHCPDARGS=\"$interface\"" "$target_path"
+        log_info "DHCPDARGS to $interface in $target_path was set successfully"
+    else
+        log_error "Cannot set DHCPDARGS to $interface in $target_path since the script was not invoked with sudo"
+        exit 1
+    fi
+}
+function gen_dhcpd_conf() {
+    if [[ $# != 4 ]]; then
+        log_error "Wrong number of argument was passed to set_dhcp_dargs method"
+        exit 1
+    fi
+    local target_path="/etc/dhcpd.conf"
+    if is_root; then
+        local interface="$1"
+        local zone="$2"
+        local start_range="$3"
+        local end_range="$4"
+        local mac_address=$(get_interface_mac_address "$interface")
+        log_info "Backing up $target_path to $target_path.bac"
+        cp "$target_path" "$target_path.bac"
+        local net_id="10.1.1.0"
+        local cidr="24"
+        local netmask=$(cidr2netmask "$cidr")
+
+        log_info "Generating random IP address with $net_id and netmask $netmask"
+        local ip_address=$(get_ip4_random_address "$net_id" "$cidr" "1")
+        log_info "setting generated IP $ip_address to interface $interface"
+        /sbin/ifconfig "$interface" "$ip_address" netmask "$netmask" up
+
+        log_info "Creating $target_path for ip $ip_address with network address $net_id and netmask $netmask"
+        cat >"$target_path" <<EOF
+ddns-update-style none;
+ddns-updates off;
+option T150 code 150 = string;
+deny client-updates;
+one-lease-per-client false;
+allow bootp;
+
+default-lease-time 1200;
+max-lease-time 9200;
+
+option domain-name-servers $ip_address;
+option domain-name "$zone";
+
+subnet $net_id netmask $netmask{
+range $start_range $end_range;
+
+option routers 10.1.1.9;
+
+        host jupiter {
+                hardware ethernet $mac_address;
+                fixed-address 10.1.1.100;
+        }
+
+}
+EOF
+    else
+        log_error "Cannot generate $target_path since the script was not invoked with sudo"
+        exit 1
+    fi
+
+}
+function start_dhcp_client() {
+    if [[ $# != 2 ]]; then
+        log_error "Wrong number of argument was passed to start_dhcp_client method"
+        exit 1
+    fi
+    if is_root; then
+        local interface="$1"
+        local ip_address="$2"
+        log_info "Setting dhcp client interface $interface IP address to $ip_address and netmask $netmask"
+        /sbin/ifconfig "$interface" "$ip_address" netmask "$netmask" up
+        log_info "starting dhcp client at interface $interface "
+        /sbin/dhclient "$interface"
+    else
+        log_error "could not set dhcp client since the script was not invoked with sudo"
         exit 1
     fi
 }

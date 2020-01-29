@@ -56,7 +56,7 @@ function available_network_interfaces() {
     result="$(/sbin/ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d')"
     echo $result
 }
-prefix_to_bit_netmask() {
+function prefix_to_bit_netmask() {
     prefix=$1
     shift=$((32 - prefix))
 
@@ -408,7 +408,7 @@ function extractFromIP4Addr() {
     cidr | netmask)
         echo "${re[3]}"
         ;;
-    *) # aka ip4
+    *)
         echo "${re[2]}"
         ;;
     esac
@@ -525,6 +525,27 @@ function ip4_is_network_member() {
 
     return ${E_ERROR}
 }
+function get_interface_mac_address() {
+    if [[ $# != 1 ]]; then
+        log_error "Wrong number of argument was passed to get_interface_mac_address method"
+        exit 1
+    fi
+    local interface=$1
+    local interface=$1
+    local result=$(ifconfig "$interface" | grep -oP 'ether \K\S+')
+    echo "$result"
+}
+function get_interface_ip_address() {
+    if [[ $# != 1 ]]; then
+        log_error "Wrong number of argument was passed to get_interface_ip_address method"
+        exit 1
+    fi
+    local interface=$1
+    local result=$(ifconfig "$interface" | grep -oP 'inet \K\S+')
+    echo "$result"
+
+}
+
 # generates a random mac address
 function generate_mac_address() {
     local RANGE=255

@@ -13,6 +13,11 @@ source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/io/io.sh"
 # shellcheck source=./lib/array/array.sh
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/array/array.sh"
 
+# Delete me
+
+# shellcheck source=./lib/network/network.sh
+source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/lib/network/network.sh"
+
 function lab1_help() {
 
     echo
@@ -28,23 +33,48 @@ function lab1_help() {
     echo -e "  \t\t\t\t\t-[flag|optional] <path> generates configuration script."
     echo -e "  \t\t\t\t\tand stores it at given <path>."
     echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
+
     echo -e "  generate-interface-config\t\tConfigures interfaces with ip per lab1(a) instructions"
     echo -e "  \t\t\t\t\t-[arg]<machnie-number> machine number to generate configuartion for."
     echo -e "  \t\t\t\t\t-[flag|optional] <path> generates configuration script."
     echo -e "  \t\t\t\t\tand stores it at given <path>."
     echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
+
     echo -e "  setup-dns-server\t\tGenerates a dns zonefile and sets up dns server"
-    echo -e "  \t\t\t\t\t-[flag] <zone> pass in dns zone noem."
+    echo -e "  \t\t\t\t\t-[flag] <zone> pass in dns zone name."
     echo -e "  \t\t\t\t\t-[flag] <server> pass in server ip address with netmask. eg 10.1.1.1/24"
     echo -e "  \t\t\t\t\t-[flag] <client> pass in client ip address."
+
+    echo -e "  setup-dns-client\t\tGenerates a dns zonefile and sets up dns server"
+    echo -e "  \t\t\t\t\t-[flag] <zone> pass in dns zone name."
+    echo -e "  \t\t\t\t\t-[flag] <server> pass in server ip address . eg 10.1.1.1"
+
+    echo -e "  setup-dhcp-server\t\tSets up dhcp server"
+    echo -e "  \t\t\t\t\t-[flag] <interface> interface to set DHCPDARGS."
+    echo -e "  \t\t\t\t\t-[flag] <server-interface> interface to run dhcp server."
+    echo -e "  \t\t\t\t\t-[flag] <zone> dhcp server zone"
+    echo -e "  \t\t\t\t\t-[flag] <start-range> pass starting point of dhcp ips."
+    echo -e "  \t\t\t\t\t-[flag] <end-range> pass end point of dhcp ips."
+
+    echo -e "  setup-dhcp-client\t\tSets up dhcp client"
+    echo -e "  \t\t\t\t\t-[flag] <ip-addr> client ip address."
+    echo -e "  \t\t\t\t\t-[flag] <interface> interface to set client ip address."
+
     echo -e "  list-routers\t\t\t\tlists routers and shows interface configuration"
+
     echo -e "  show-routing-table\t\t\t\tshows the routing table"
+
     echo -e "  check-config\t\t\t\tChecks Configuration"
+
     echo -e "  interface-status\t\t\tShows network interfaces status"
+
     echo -e "  enable-ip-forwarding\t\t\tEnables ip forwarding "
+
     echo -e "  disable-ip-forwarding\t\t\tDisables ip forwarding"
+
     echo -e "  disable-interface\t\t\tDisables a network interface"
     echo -e "  \t\t\t\t\t-[arg]<name> target interface name"
+
     echo -e "  enable-interface\t\t\tEnables a network interface"
     echo -e "  \t\t\t\t\t-[arg]<name> target interface name"
     echo
@@ -66,6 +96,18 @@ function lab1_help() {
     echo "    setup-dns-client \\"
     echo "    --zone galaxy.net \\"
     echo "    --server 10.3.4.2"
+    echo
+    echo "  network lab1 \\"
+    echo "    setup-dhcp-server \\"
+    echo "    --interface eth0 \\"
+    echo "    --zone galaxy.net \\"
+    echo "    --start-range 10.1.1.10 \\"
+    echo "    --end-range 10.1.1.20"
+    echo
+    echo "  network lab1 \\"
+    echo "    setup-dhcp-client \\"
+    echo "    --interface eth1 \\"
+    echo "    --ip-addr 10.1.1.56"
     echo
     echo "  network lab1 \\"
     echo "    interface-status"
@@ -163,6 +205,84 @@ function network_lab1() {
             assert_not_empty "zone" "$zone" "dns zone is needed"
             assert_not_empty "server" "$server" "server ip address and netmask is needed"
             client_dns_setup "$zone" "$server"
+            shift
+            exit
+            ;;
+        setup-dhcp-server)
+            local interface=""
+            local server_interface=""
+            local zone=""
+            local start_range=""
+            local end_range=""
+            while [[ $# -gt 0 ]]; do
+                local choice="$1"
+                case "$choice" in
+                --interface)
+                    interface="$2"
+                    shift
+                    ;;
+                --server-interface)
+                    server_interface="$2"
+                    shift
+                    ;;
+                --zone)
+                    zone="$2"
+                    shift
+                    ;;
+                --start-range)
+                    start_range="$2"
+                    shift
+                    ;;
+                --end-range)
+                    end_range="$2"
+                    shift
+                    ;;
+                *)
+                    shift
+                    ;;
+                esac
+            done
+            assert_not_empty "interface" "$interface" "interface for dhcpd is needed"
+            assert_not_empty "server_interface" "$server_interface" "interface for dhcp server is needed"
+            assert_not_empty "zone" "$zone" "interface for dhcpd is needed"
+            assert_not_empty "start_range" "$start_range" "dhcp ip start range is needed"
+            assert_not_empty "end_range" "$end_range" "dhcp ip end range is needed"
+
+            set_dhcp_dargs "$interface"
+            sleep 5
+            log_info "restarting dhcpd service"
+            service dhcpd restart
+            sleep 5
+            gen_dhcpd_conf "$interface" "$zone" "$start_range" "$end_range"
+            log_info "Starting dhcp server at $server_interface"
+            /usr/sbin/dhcpd "$server_interface"
+            shift
+            exit
+            ;;
+        setup-dhcp-client)
+            local interface=""
+            local ip_addr=""
+
+            while [[ $# -gt 0 ]]; do
+                local choice="$1"
+                case "$choice" in
+                --interface)
+                    interface="$2"
+                    shift
+                    ;;
+                --ip-addr)
+                    ip_addr="$2"
+                    shift
+                    ;;
+
+                *)
+                    shift
+                    ;;
+                esac
+            done
+            assert_not_empty "interface" "$interface" "interface for dhcpd is needed"
+            assert_not_empty "ip_addr" "$ip_addr" "client ip address is needed"
+            start_dhcp_client "$interface" "$ip_addr"
             shift
             exit
             ;;
@@ -301,7 +421,6 @@ function network_lab1() {
             shift
             exit
             ;;
-
         list-routers)
             if [[ $# != 1 ]]; then
                 lab1_help
@@ -311,7 +430,6 @@ function network_lab1() {
             shift
             exit
             ;;
-
         interface-status)
             if [[ $# != 1 ]]; then
                 lab1_help
