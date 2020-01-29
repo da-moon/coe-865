@@ -12,6 +12,73 @@ source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/array/array.s
 source "$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)/string/string.sh"
 
 export SUBNET_NR=0
+function run_lab1a_scenario() {
+    if [[ $# != 1 ]]; then
+        log_error "Wrong number of argument was passed to run_lab1a_scenario method"
+        exit 1
+    fi
+    if is_root; then
+        local key="$1"
+        case "$key" in
+        r1)
+            log_info "Setting $(string_red "ETH0") 192.168.98.10"
+            /sbin/ifconfig eth0 192.168.98.10 netmask 255.255.255.0 up
+            log_info"Setting $(string_yellow "ETH1") 10.1.1.1"
+            /sbin/ifconfig eth1 10.1.1.1 netmask 255.255.255.0 up
+            log_info"Setting $(string_green "ETH2") 10.1.2.2"
+            /sbin/ifconfig eth2 10.1.2.2 netmask 255.255.255.0 up
+            shift
+            exit
+            ;;
+        r2)
+            log_info "Setting $(string_red "ETH0") 10.1.1.2"
+            /sbin/ifconfig eth0 10.1.1.2 netmask 255.255.255.0 up
+            log_info "Setting $(string_yellow "ETH1") 10.1.4.1"
+            /sbin/ifconfig eth1 10.1.4.1 netmask 255.255.255.0 up
+            log_info "Setting access for r2-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r1-eth1 (10.1.1.1)"
+            /sbin/route add -host 192.168.98.10 gw 10.1.1.1 dev eth0
+            log_info "Setting access for r2-eth1 to reach r1-eth1 (10.1.1.0) through r4-eth0 (10.1.4.2)"
+            /sbin/route add -net 10.1.2.0 netmask 255.255.255.0 gw 10.1.4.2 dev eth1
+            shift
+            exit
+            ;;
+        r3)
+            log_info "Setting $(string_red "ETH0") 10.1.2.1"
+            /sbin/ifconfig eth0 10.1.2.1 netmask 255.255.255.0 up
+            log_info "Setting $(string_green "ETH1") 10.1.3.2"
+            /sbin/ifconfig eth1 10.1.3.2 netmask 255.255.255.0 up
+            log_info "Setting access for r3-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r1-eth2 (10.1.2.2)"
+            /sbin/route add -host 192.168.98.10 gw 10.1.2.2 dev eth0
+            log_info "Setting access for r3-eth1 to reach r1-eth1 (10.1.1.0) through r4-eth0 (10.1.3.1)"
+            /sbin/route add -net 10.1.1.0 netmask 255.255.255.0 gw 10.1.3.1 dev eth1
+
+            shift
+            exit
+            ;;
+        r4)
+            log_info "Setting $(string_red "ETH0") 10.1.3.1"
+            /sbin/ifconfig eth0 10.1.3.1 netmask 255.255.255.0 up
+            log_info "Setting $(string_yellow "ETH1") 10.1.4.2"
+            /sbin/ifconfig eth1 10.1.4.2 netmask 255.255.255.0 up
+            log_info "Setting access for r4-eth0 to reach r1-eth0 (internet : 192.168.98.10) through r3-eth1 (10.1.3.2)"
+            /sbin/route add -host 192.168.98.10 gw 10.1.3.2 dev eth0
+            log_info "Setting access for r4-eth1 to reach r1-eth1 (10.1.1.0) through r2-eth1 (10.1.4.1)"
+            /sbin/route add -net 10.1.1.0 netmask 255.255.255.0 gw 10.1.4.1 dev eth1
+            log_info "Setting access for r4-eth0 to reach r1-eth2 (10.1.2.0) through r3-eth1 (10.1.3.2)"
+            /sbin/route add -net 10.1.2.0 netmask 255.255.255.0 gw 10.1.3.2 dev eth0
+            shift
+            exit
+            ;;
+        *)
+            shift
+            ;;
+        esac
+    else
+        log_error "Cannot run scenario one since the script was not invoked with sudo"
+        exit 1
+    fi
+
+}
 function generate_config() {
     local target_path="$1"
     input="$2"

@@ -28,14 +28,20 @@ function lab1_help() {
     echo
     echo "Commands:"
     echo
+    echo -e "  run-scenario-a\t\tRan lab1 scenario (a)"
+    echo -e "  only machines r1,r2,r3 and r4 are supported"
+    echo -e "  \t\t\t\t\t-[arg]<machine-name> choose a machine from list<r1,r2,r3,r4>."
+    echo
+
     echo -e "  generate-random-interface-config\t\tConfigures interfaces with random ip per"
     echo -e "  \t\t\t\t\t-[arg]<cidr> cidr for ip addresses."
     echo -e "  \t\t\t\t\t-[flag|optional] <path> generates configuration script."
     echo -e "  \t\t\t\t\tand stores it at given <path>."
     echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
+    echo
 
     echo -e "  generate-interface-config\t\tConfigures interfaces with ip per lab1(a) instructions"
-    echo -e "  \t\t\t\t\t-[arg]<machnie-number> machine number to generate configuartion for."
+    echo -e "  \t\t\t\t\t-[arg]<machine-number> machine number to generate configuartion for."
     echo -e "  \t\t\t\t\t-[flag|optional] <path> generates configuration script."
     echo -e "  \t\t\t\t\tand stores it at given <path>."
     echo -e "  \t\t\t\t\tBy default it is stored at $HOME/IPaddr.exec"
@@ -126,6 +132,17 @@ function network_lab1() {
     while [[ $# -gt 0 ]]; do
         local key="$1"
         case "$key" in
+
+        run-scenario-a)
+            if [[ $# != 2 ]]; then
+                lab1_help
+                exit 1
+            fi
+            machine_name="$2"
+            run_lab1a_scenario "machine_name"
+            shift
+            exit
+            ;;
         generate-random-interface-config)
             if [[ $# -gt 3 ]]; then
                 lab1_help
