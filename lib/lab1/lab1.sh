@@ -546,6 +546,8 @@ function start_dhcp_client() {
     if is_root; then
         local interface="$1"
         local ip_address="$2"
+        local netmask="255.255.255.0"
+
         log_info "Setting dhcp client interface $interface IP address to $ip_address and netmask $netmask"
         /sbin/ifconfig "$interface" "$ip_address" netmask "$netmask" up
         log_info "starting dhcp client at interface $interface "
