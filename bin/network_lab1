@@ -50,8 +50,7 @@ function lab1_help() {
     echo -e "  \t\t\t\t\t-[flag] <server> pass in server ip address . eg 10.1.1.1"
 
     echo -e "  setup-dhcp-server\t\tSets up dhcp server"
-    echo -e "  \t\t\t\t\t-[flag] <interface> interface to set DHCPDARGS."
-    echo -e "  \t\t\t\t\t-[flag] <server-interface> interface to run dhcp server."
+    echo -e "  \t\t\t\t\t-[flag] <interface> interface to run dhcp server at."
     echo -e "  \t\t\t\t\t-[flag] <zone> dhcp server zone"
     echo -e "  \t\t\t\t\t-[flag] <start-range> pass starting point of dhcp ips."
     echo -e "  \t\t\t\t\t-[flag] <end-range> pass end point of dhcp ips."
@@ -100,7 +99,6 @@ function lab1_help() {
     echo "  network lab1 \\"
     echo "    setup-dhcp-server \\"
     echo "    --interface eth0 \\"
-    echo "    --server-interface eth1 \\"
     echo "    --zone galaxy.net \\"
     echo "    --start-range 10.1.1.10 \\"
     echo "    --end-range 10.1.1.20"
