@@ -476,7 +476,6 @@ mail IN A $server_ip
 ; address
 ;
 client IN A $client
-server IN A $server_ip
 EOF
     else
         log_error "Cannot generate $target_path since the script was not invoked with sudo"
