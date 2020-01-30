@@ -65,7 +65,7 @@ function run_lab1a_scenario() {
             log_info "Setting access for r3-eth1 to reach r1-eth1 (10.1.1.0) through r4-eth0 (10.1.2.2)"
             /sbin/route add -net 10.1.1.0 netmask 255.255.255.0 gw 10.1.2.2 dev eth0
             log_info "Setting access for r3-eth1 to reach r1-eth1 (10.1.4.0) through r4-eth1 (10.1.4.1)"
-            /sbin/route add -net 10.1.4.0 netmask 255.255.255.0 gw 10.1.4.1 dev eth1
+            /sbin/route add -net 10.1.4.0 netmask 255.255.255.0 gw 10.1.3.1 dev eth1
             shift
             exit
             ;;
